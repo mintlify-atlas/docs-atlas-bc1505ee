@@ -1,0 +1,54 @@
+---
+title: "DNSHE Free Domains: what it is and how it works"
+description: "DNSHE is a non-profit subdomain platform with enterprise-grade Anycast DNS, a 180-day renewal window, and a full REST API — completely free."
+---
+
+DNSHE ([dnshe.com](https://www.dnshe.com)) is a non-profit subdomain distribution platform built by the DNSHE Team to lower the barrier for developers, students, and open-source enthusiasts to establish a digital presence. Every subdomain is backed by enterprise-grade Anycast DNS infrastructure, giving you millisecond-level resolution globally with 99.9% uptime — at no cost, and with no credit card required.
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Anycast DNS" icon="network-wired">
+    Distributed global network with millisecond-level resolution speed and redundant nodes for 99.9% uptime.
+  </Card>
+  <Card title="180-day renewal window" icon="calendar">
+    The longest renewal window in the industry. Renew manually via the dashboard or automate it through the API — six months of breathing room.
+  </Card>
+  <Card title="REST API" icon="terminal">
+    Manage subdomains, DNS records, and API keys programmatically. Designed for automation, CI pipelines, and SSL certificate renewals.
+  </Card>
+  <Card title="Full record type support" icon="list">
+    Create A, AAAA, CNAME, MX, TXT, NS, SRV, and CAA records — the complete set needed for any real-world deployment.
+  </Card>
+</CardGroup>
+
+## How DNSHE compares
+
+Most free subdomain services impose short renewal windows (sometimes just a few days before expiry), provide no API access, and support only basic record types. DNSHE takes a different approach:
+
+| Feature | DNSHE | Typical free services |
+| :--- | :--- | :--- |
+| Renewal window | 180 days | 7–30 days |
+| REST API | Yes — full management | None or read-only |
+| Anycast infrastructure | Yes | No |
+| Record types | A, AAAA, CNAME, MX, TXT, NS, SRV, CAA | A, CNAME only |
+| Cost | Free, non-profit | Free (ad-supported) |
+
+## Supported record types
+
+DNSHE supports the full set of standard DNS record types:
+
+| Type | Purpose |
+| :--- | :--- |
+| **A** | Maps a hostname to an IPv4 address |
+| **AAAA** | Maps a hostname to an IPv6 address |
+| **CNAME** | Aliases one hostname to another |
+| **MX** | Routes email for a domain |
+| **TXT** | Stores arbitrary text — used for SPF, DKIM, domain verification |
+| **NS** | Delegates a subdomain to a different nameserver |
+| **SRV** | Specifies a host and port for a service |
+| **CAA** | Restricts which certificate authorities may issue TLS certificates |
+
+<Note>
+  DNSHE maintains a zero-tolerance policy towards illegal activity. Review the [acceptable use policy](/policy/acceptable-use) before registering. To report abuse, contact abuse@dnshe.com.
+</Note>

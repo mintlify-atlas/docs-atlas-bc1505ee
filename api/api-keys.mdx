@@ -1,0 +1,87 @@
+---
+title: "API key endpoints: list, create, and rotate secrets"
+description: "List your DNSHE API keys, create new ones via the dashboard, and regenerate lost secrets. Includes security best practices for production key management."
+---
+
+API keys authenticate your requests to the DNSHE domain hub API. Each key consists of a key identifier (prefixed `cfsd_`) and a secret. You use both values together as HTTP headers on every authenticated request. This page covers the list endpoint and explains how to create or regenerate keys via the dashboard.
+
+---
+
+## List API keys
+
+Returns all API keys associated with your account.
+
+**Method:** `GET`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=keys&action=list`
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=keys&action=list" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy"
+```
+
+### Response fields
+
+<ResponseField name="success" type="boolean" required>
+  `true` when the request completed without errors.
+</ResponseField>
+
+<ResponseField name="keys" type="object[]" required>
+  Array of API key objects registered to your account.
+</ResponseField>
+
+---
+
+## Creating a new API key
+
+New API keys are created through the DNSHE client area dashboard, not via the API itself.
+
+<Steps>
+  <Step title="Log in to the DNSHE client area">
+    Go to your account and sign in.
+  </Step>
+  <Step title="Open My Domain Management">
+    Navigate to **My Domain Management** from the main menu.
+  </Step>
+  <Step title="Click API Management">
+    Select **API Management** in the sidebar.
+  </Step>
+  <Step title="Create a new key">
+    Click the button to generate a new API key and secret pair.
+  </Step>
+</Steps>
+
+<Warning>
+  The API secret is shown only once when the key is created. Store it securely immediately — you cannot retrieve it again after leaving the page.
+</Warning>
+
+---
+
+## Regenerating a lost secret
+
+If you lose your API secret, you can regenerate it using the `regenerate` action. This invalidates the previous secret immediately, so any integrations using the old secret will stop working until updated.
+
+<Note>
+  Regeneration is available via the dashboard under **API Management**. After regenerating, update all services and environment variables that reference the old secret before they make their next request.
+</Note>
+
+---
+
+## Security best practices
+
+Following these practices reduces the risk of unauthorized API access.
+
+<AccordionGroup>
+  <Accordion title="Enable IP whitelisting">
+    Restrict each API key to a specific set of IP addresses. This way, even if credentials are exposed, they cannot be used from an unrecognized source. Configure IP whitelists in the **API Management** dashboard.
+  </Accordion>
+  <Accordion title="Rotate keys regularly">
+    Periodically rotate your API keys and secrets, especially after team member changes or suspected exposure. Use the `regenerate` action and update your integrations promptly.
+  </Accordion>
+  <Accordion title="Store credentials in environment variables">
+    Never hard-code your API key or secret in source code or commit them to version control. Load them at runtime from environment variables or a secrets manager.
+  </Accordion>
+  <Accordion title="Always use HTTPS">
+    All requests to the DNSHE API must use HTTPS. This is enforced by the API, but verify your HTTP client does not follow redirects that downgrade to plain HTTP.
+  </Accordion>
+</AccordionGroup>

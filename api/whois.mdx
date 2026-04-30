@@ -1,0 +1,29 @@
+---
+title: "WHOIS lookup: query any DNSHE domain without auth"
+description: "Look up registration details for any DNSHE-managed domain using the public WHOIS endpoint. No API key or authentication is required to use this endpoint."
+---
+
+The WHOIS endpoint provides basic registration information for any domain managed by DNSHE. Because it is a read-only public endpoint, no API key or secret is needed. This makes it suitable for use in client-side tools, public dashboards, or any context where you cannot safely store credentials.
+
+---
+
+## WHOIS lookup
+
+Returns WHOIS information for the specified fully-qualified domain name.
+
+**Method:** `GET`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=whois&domain={full_domain}`
+
+### Query parameters
+
+<ParamField query="domain" type="string" required>
+  The fully-qualified domain name to look up (e.g. `foo.example.com`). This should be the complete subdomain, not just the label.
+</ParamField>
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=whois&domain=foo.example.com"
+```
+
+<Note>
+  This is a public endpoint — no `X-API-Key` or `X-API-Secret` header is required. Any client can query it without authentication.
+</Note>

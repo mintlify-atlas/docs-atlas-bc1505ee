@@ -1,0 +1,175 @@
+---
+title: "Subdomain endpoints: register, list, renew, delete"
+description: "Register, list, inspect, renew, and delete free subdomains programmatically using the DNSHE domain hub API. All actions require API key authentication."
+---
+
+The subdomain endpoints let you manage the full lifecycle of your free subdomains. All five actions require authentication via the `X-API-Key` and `X-API-Secret` HTTP headers. Requests that omit these headers will receive an `auth_invalid_credentials` error.
+
+---
+
+## List subdomains
+
+Returns all subdomains registered to your account.
+
+**Method:** `GET`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=list`
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=list" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy"
+```
+
+### Response fields
+
+<ResponseField name="success" type="boolean" required>
+  `true` when the request completed without errors.
+</ResponseField>
+
+<ResponseField name="count" type="number" required>
+  Total number of subdomains returned.
+</ResponseField>
+
+<ResponseField name="subdomains" type="object[]" required>
+  Array of subdomain objects.
+  <Expandable title="subdomain properties">
+    <ResponseField name="id" type="number">
+      Unique numeric identifier for the subdomain.
+    </ResponseField>
+    <ResponseField name="subdomain" type="string">
+      The subdomain label (e.g. `test`).
+    </ResponseField>
+    <ResponseField name="rootdomain" type="string">
+      The root domain this subdomain is registered under (e.g. `example.com`).
+    </ResponseField>
+    <ResponseField name="full_domain" type="string">
+      The fully-qualified domain name (e.g. `test.example.com`).
+    </ResponseField>
+    <ResponseField name="status" type="string">
+      Current status of the subdomain. Typical value: `active`.
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+### Response example
+
+```json
+{
+  "success": true,
+  "count": 2,
+  "subdomains": [
+    {
+      "id": 1,
+      "subdomain": "test",
+      "rootdomain": "example.com",
+      "full_domain": "test.example.com",
+      "status": "active"
+    }
+  ]
+}
+```
+
+---
+
+## Register subdomain
+
+Registers a new subdomain under one of the available root domains.
+
+**Method:** `POST`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=register`
+
+### Request body
+
+<ParamField body="subdomain" type="string" required>
+  The subdomain label to register (e.g. `myapp`). Must be unique within the root domain.
+</ParamField>
+
+<ParamField body="rootdomain" type="string" required>
+  The root domain to register the subdomain under (e.g. `example.com`). Must be one of the supported domain suffixes.
+</ParamField>
+
+```bash
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=register" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subdomain": "myapp",
+    "rootdomain": "example.com"
+  }'
+```
+
+---
+
+## Get subdomain details
+
+Fetches details for a single subdomain by its ID.
+
+**Method:** `GET`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=get&subdomain_id={id}`
+
+### Query parameters
+
+<ParamField query="subdomain_id" type="number" required>
+  The numeric ID of the subdomain to retrieve. You can find this ID in the list subdomains response.
+</ParamField>
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=get&subdomain_id=1" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy"
+```
+
+---
+
+## Delete subdomain
+
+Permanently deletes a subdomain and all associated DNS records.
+
+**Method:** `POST`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=delete`
+
+### Request body
+
+<ParamField body="subdomain_id" type="number" required>
+  The numeric ID of the subdomain to delete.
+</ParamField>
+
+<Warning>
+  Deleting a subdomain is irreversible. All DNS records associated with the subdomain will also be removed immediately.
+</Warning>
+
+```bash
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=delete" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{"subdomain_id": 1}'
+```
+
+---
+
+## Renew subdomain
+
+Renews a subdomain registration to extend its active period.
+
+**Method:** `POST`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=renew`
+
+### Request body
+
+<ParamField body="subdomain_id" type="number" required>
+  The numeric ID of the subdomain to renew.
+</ParamField>
+
+```bash
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=renew" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{"subdomain_id": 3}'
+```
+
+<Tip>
+  Renew subdomains before they expire to avoid losing your registration. You can automate renewal using the API together with a scheduled job.
+</Tip>

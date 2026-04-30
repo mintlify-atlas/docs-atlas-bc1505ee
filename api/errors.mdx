@@ -1,0 +1,71 @@
+---
+title: "DNSHE API error codes and error response format"
+description: "Every DNSHE API error follows a consistent JSON structure. Learn the known error codes and how to handle failures programmatically."
+---
+
+Every error response from the DNSHE API returns a JSON object with a `success` field set to `false`, a machine-readable `error_code`, and a human-readable `message`. Checking these fields gives you everything you need to identify what went wrong and respond appropriately.
+
+<Note>
+Always check the `success` field before processing a response. A `200 OK` HTTP status does not guarantee a successful operation — the `success` field is the authoritative indicator.
+</Note>
+
+## Error response structure
+
+All API errors share the same JSON shape regardless of the endpoint or action.
+
+```json
+{
+  "success": false,
+  "error_code": "auth_invalid_credentials",
+  "message": "Invalid API key"
+}
+```
+
+| Field        | Type    | Description                                              |
+| ------------ | ------- | -------------------------------------------------------- |
+| `success`    | boolean | Always `false` for error responses.                      |
+| `error_code` | string  | Machine-readable code identifying the error category.    |
+| `message`    | string  | Human-readable description of what went wrong.           |
+
+Some errors include an additional `details` object with structured context, such as quota or rate limit metadata.
+
+## Known error codes
+
+| Error code                  | Meaning                                                        |
+| --------------------------- | -------------------------------------------------------------- |
+| `auth_invalid_credentials`  | The API key or API secret is missing, invalid, or revoked.     |
+| `rate_limit_exceeded`       | The request rate exceeds the allowed limit for your API key.   |
+
+### `rate_limit_exceeded` — extended response
+
+When your request is rate-limited, the response includes a `details` object with limit and remaining counters.
+
+```json
+{
+  "error_code": "rate_limit_exceeded",
+  "details": {
+    "limit": 60,
+    "remaining": 0
+  }
+}
+```
+
+## Handling errors programmatically
+
+Check `success` first, then branch on `error_code` to decide how to respond. The example below illustrates a minimal error-handling pattern.
+
+```json
+{
+  "success": false,
+  "error_code": "auth_invalid_credentials",
+  "message": "Invalid API key"
+}
+```
+
+Recommended approach:
+
+1. Read the `success` field. If `true`, proceed with the response payload.
+2. If `false`, read `error_code` to determine the failure category.
+3. For `rate_limit_exceeded`, inspect `details.remaining` and implement a backoff before retrying.
+4. For `auth_invalid_credentials`, verify your `X-API-Key` and `X-API-Secret` headers and rotate keys if necessary.
+5. Surface the `message` field in logs or user-facing output for debugging context.

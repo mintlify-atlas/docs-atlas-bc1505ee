@@ -1,0 +1,90 @@
+---
+title: "DNSHE REST API: base URL, authentication, endpoints"
+description: "A complete reference for the DNSHE Free Domains REST API — manage subdomains, DNS records, quotas, and more with JSON over HTTPS."
+---
+
+The DNSHE REST API gives you programmatic control over every aspect of your free subdomain infrastructure. All requests are authenticated with an API key and secret sent as HTTP headers, and every response is JSON — making it straightforward to integrate with scripts, CI/CD pipelines, or any application that can make an HTTP request.
+
+## Base URL
+
+Every API request is made to the same base URL:
+
+```
+https://api005.dnshe.com/index.php?m=domain_hub
+```
+
+Append `&endpoint=<group>&action=<action>` (plus any required parameters) to target a specific operation.
+
+## Request and response structure
+
+### Requests
+
+- Use `GET` for read operations and `POST` for write operations.
+- Pass additional parameters as query string arguments (for `GET`) or as a JSON body with `Content-Type: application/json` (for `POST`).
+- All requests must include the `X-API-Key` and `X-API-Secret` headers. See [Authentication](/api/authentication) for details.
+
+### Responses
+
+All responses are JSON objects. A successful response always includes `"success": true`:
+
+```json
+{
+  "success": true,
+  "count": 2,
+  "subdomains": [...]
+}
+```
+
+A failed response includes `"success": false`, an `error_code`, and a human-readable `message`:
+
+```json
+{
+  "success": false,
+  "error_code": "auth_invalid_credentials",
+  "message": "Invalid API key"
+}
+```
+
+## Rate limiting
+
+The API enforces a limit of **60 requests per minute**. If you exceed the limit, you will receive the following response:
+
+```json
+{
+  "error_code": "rate_limit_exceeded",
+  "details": {
+    "limit": 60,
+    "remaining": 0
+  }
+}
+```
+
+Design your integrations to respect this limit. For bulk workflows, batch your requests or add delays between calls.
+
+## Endpoint groups
+
+<CardGroup cols={2}>
+  <Card title="Subdomains" icon="globe" href="/api/subdomains">
+    Register, list, inspect, renew, and delete your free subdomains.
+  </Card>
+  <Card title="DNS Records" icon="server" href="/api/dns-records">
+    Create and manage A, AAAA, CNAME, MX, TXT, NS, SRV, and CAA records for your subdomains.
+  </Card>
+  <Card title="Keys" icon="key" href="/api/api-keys">
+    List and manage the API keys associated with your account.
+  </Card>
+  <Card title="Quota" icon="chart-bar" href="/api/quota">
+    Check how many subdomains and DNS records you have used against your account limits.
+  </Card>
+  <Card title="WHOIS" icon="search" href="/api/whois">
+    Look up registration information for any subdomain on the DNSHE network. No authentication required.
+  </Card>
+</CardGroup>
+
+## Authentication
+
+All endpoints except WHOIS require authentication via HTTP headers. See [Authenticate with the DNSHE API](/api/authentication) to learn how to obtain and use your credentials.
+
+<Note>
+  The WHOIS endpoint (`endpoint=whois`) is a public API and does not require any credentials.
+</Note>

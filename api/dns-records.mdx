@@ -1,0 +1,79 @@
+---
+title: "DNS record endpoints: list and create DNS records"
+description: "List and create DNS records for your DNSHE subdomains. Supports A, AAAA, CNAME, MX, TXT, NS, SRV, and CAA types with global Anycast propagation."
+---
+
+The DNS records endpoints let you manage DNS records attached to your subdomains. Records are distributed over DNSHE's Anycast network for fast global propagation. All requests require authentication via the `X-API-Key` and `X-API-Secret` HTTP headers.
+
+---
+
+## List DNS records
+
+Returns all DNS records associated with a specific subdomain.
+
+**Method:** `GET`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=list&subdomain_id={id}`
+
+### Query parameters
+
+<ParamField query="subdomain_id" type="number" required>
+  The numeric ID of the subdomain whose DNS records you want to list. You can retrieve this ID from the [list subdomains](/api/subdomains) endpoint.
+</ParamField>
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=list&subdomain_id=1" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy"
+```
+
+---
+
+## Create DNS record
+
+Adds a new DNS record to a subdomain. The record is propagated globally via Anycast DNS after creation.
+
+**Method:** `POST`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=create`
+
+### Request body
+
+<ParamField body="subdomain_id" type="number" required>
+  The numeric ID of the subdomain to attach the record to.
+</ParamField>
+
+<ParamField body="type" type="string" required>
+  The DNS record type. Supported values: `A`, `AAAA`, `CNAME`, `MX`, `TXT`, `NS`, `SRV`, `CAA`.
+</ParamField>
+
+<ParamField body="content" type="string" required>
+  The record value. Format depends on the record type — for example, an IPv4 address for `A` records, an IPv6 address for `AAAA` records, or a quoted string for `TXT` records.
+</ParamField>
+
+```bash
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=create" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subdomain_id": 1,
+    "type": "A",
+    "content": "192.168.1.100"
+  }'
+```
+
+### Supported record types
+
+| Type    | Description                                      | Example content            |
+| ------- | ------------------------------------------------ | -------------------------- |
+| `A`     | Maps a hostname to an IPv4 address               | `192.168.1.100`            |
+| `AAAA`  | Maps a hostname to an IPv6 address               | `2001:db8::1`              |
+| `CNAME` | Canonical name alias for another hostname        | `target.example.com`       |
+| `MX`    | Mail exchange server for the domain              | `10 mail.example.com`      |
+| `TXT`   | Arbitrary text, used for SPF, DKIM, and more     | `"v=spf1 include:... -all"` |
+| `NS`    | Authoritative name server for a delegated zone   | `ns1.example.com`          |
+| `SRV`   | Service location record                          | `10 20 443 target.example.com` |
+| `CAA`   | Certification authority authorization            | `0 issue "letsencrypt.org"` |
+
+<Note>
+  After a record is created, DNSHE propagates it across the Anycast network globally within seconds.
+</Note>

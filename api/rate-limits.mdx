@@ -1,0 +1,41 @@
+---
+title: "DNSHE API rate limiting: 60 requests per minute"
+description: "The DNSHE API enforces a default limit of 60 requests per minute. Learn how limits are reported and how to build resilient integrations."
+---
+
+The DNSHE API enforces a rate limit on all authenticated requests to protect service stability for all users. Understanding the limit and designing your client to handle it gracefully keeps your integration reliable.
+
+## Default rate limit
+
+The API allows **60 requests per minute** per API key. This limit is configurable — contact DNSHE support if your use case requires a higher threshold.
+
+## Rate limit exceeded response
+
+When you exceed the rate limit, the API returns an error response with `error_code` set to `rate_limit_exceeded`. The `details` object includes the configured limit and the number of remaining requests (always `0` when the limit is hit).
+
+```json
+{
+  "success": false,
+  "error_code": "rate_limit_exceeded",
+  "details": {
+    "limit": 60,
+    "remaining": 0
+  }
+}
+```
+
+Read `details.limit` to confirm the effective limit for your key, and `details.remaining` to verify you have no requests left in the current window.
+
+## Best practices
+
+<Warning>
+The DNSHE API does not support batch operations in the current v2.0 release. Each subdomain or DNS record operation requires a separate request, so plan your request budget accordingly.
+</Warning>
+
+**Implement exponential backoff and retry.** When you receive `rate_limit_exceeded`, wait before retrying. Start with a short delay (e.g. 1 second) and double it on each subsequent failure up to a reasonable maximum.
+
+**Cache responses where possible.** Read-heavy operations such as listing subdomains or fetching DNS records do not change frequently. Cache the results locally and refresh only when you expect changes, rather than polling on every action.
+
+**Spread requests over time.** If you need to perform many operations, distribute them across the rate limit window rather than sending them in a burst. At 60 requests per minute, you can safely issue one request per second without approaching the limit.
+
+**Monitor `details.remaining`.** Even before hitting the limit, inspect the `details` field in rate limit error responses to understand how close your integration is running to the ceiling during peak periods.

@@ -1,0 +1,128 @@
+---
+title: "Automating domain management with the DNSHE API"
+description: "Use the DNSHE REST API to register subdomains, add DNS records, and schedule renewals — ideal for CI/CD pipelines and ephemeral environments."
+---
+
+Manual domain management does not scale. Whether you are spinning up ephemeral review environments in a CI/CD pipeline, provisioning subdomains for each customer in a SaaS platform, or automating TLS certificate renewal, the DNSHE API gives you full programmatic control over every aspect of your subdomain infrastructure. This guide walks through obtaining your credentials, securing them correctly, and building a complete automation workflow from registration to scheduled renewal.
+
+<Tip>
+  For production API keys, enable IP whitelisting in the DNSHE console under **API Management**. This restricts your key to requests originating from known IP addresses, preventing misuse if the key is ever inadvertently exposed.
+</Tip>
+
+## Getting your API credentials
+
+<Steps>
+  <Step title="Log in to the DNSHE console">
+    Go to [dnshe.com](https://www.dnshe.com) and sign in to your account.
+  </Step>
+  <Step title="Open My Domain Management">
+    Click **My Domain Management** in the main navigation.
+  </Step>
+  <Step title="Navigate to API Management">
+    Click **API Management** in the sidebar. This is where all your API keys are listed.
+  </Step>
+  <Step title="Create a new API key">
+    Click **Create API Key**. The console will display your **API Key** (prefixed with `cfsd_`) and your **API Secret**. Copy both values immediately — the secret is only shown once.
+  </Step>
+</Steps>
+
+## Storing credentials in environment variables
+
+Never hard-code API credentials in scripts or configuration files. Store them as environment variables instead.
+
+```bash
+# Add to ~/.bashrc, ~/.zshrc, or your CI/CD secrets store
+export DNSHE_API_KEY="cfsd_xxxxxxxxxx"
+export DNSHE_API_SECRET="yyyyyyyyyyyy"
+```
+
+Verify the variables are available in your current shell session:
+
+```bash
+echo $DNSHE_API_KEY
+```
+
+In CI/CD systems (GitHub Actions, GitLab CI, etc.), add these as encrypted secrets and reference them in your pipeline configuration. Do not print them in logs.
+
+## Complete automation workflow
+
+The script below demonstrates the full lifecycle: register a subdomain, add an A record pointing to your server, and schedule a monthly renewal cron job.
+
+```bash
+#!/usr/bin/env bash
+# dnshe-setup.sh — register a subdomain, add an A record, schedule renewal
+
+set -euo pipefail
+
+BASE_URL="https://api005.dnshe.com/index.php?m=domain_hub"
+SUBDOMAIN="myapp"
+ROOTDOMAIN="us.ci"
+SERVER_IP="203.0.113.42"
+
+# ── Step 1: Register the subdomain ──────────────────────────────────────────
+echo "Registering ${SUBDOMAIN}.${ROOTDOMAIN} ..."
+
+REGISTER_RESPONSE=$(curl -s -X POST \
+  "${BASE_URL}&endpoint=subdomains&action=register" \
+  -H "X-API-Key: ${DNSHE_API_KEY}" \
+  -H "X-API-Secret: ${DNSHE_API_SECRET}" \
+  -H "Content-Type: application/json" \
+  -d "{\"subdomain\": \"${SUBDOMAIN}\", \"rootdomain\": \"${ROOTDOMAIN}\"}")
+
+echo "Register response: ${REGISTER_RESPONSE}"
+
+# ── Step 2: Retrieve the new subdomain ID ────────────────────────────────────
+echo "Fetching subdomain list to get ID ..."
+
+LIST_RESPONSE=$(curl -s -X GET \
+  "${BASE_URL}&endpoint=subdomains&action=list" \
+  -H "X-API-Key: ${DNSHE_API_KEY}" \
+  -H "X-API-Secret: ${DNSHE_API_SECRET}")
+
+# Extract the ID for the subdomain we just registered (requires jq)
+SUBDOMAIN_ID=$(echo "${LIST_RESPONSE}" | jq -r \
+  ".subdomains[] | select(.subdomain == \"${SUBDOMAIN}\" and .rootdomain == \"${ROOTDOMAIN}\") | .id")
+
+echo "Subdomain ID: ${SUBDOMAIN_ID}"
+
+# ── Step 3: Add an A record ──────────────────────────────────────────────────
+echo "Adding A record → ${SERVER_IP} ..."
+
+curl -s -X POST \
+  "${BASE_URL}&endpoint=dns_records&action=create" \
+  -H "X-API-Key: ${DNSHE_API_KEY}" \
+  -H "X-API-Secret: ${DNSHE_API_SECRET}" \
+  -H "Content-Type: application/json" \
+  -d "{\"subdomain_id\": ${SUBDOMAIN_ID}, \"type\": \"A\", \"content\": \"${SERVER_IP}\"}"
+
+echo "A record created."
+
+# ── Step 4: Schedule monthly renewal via cron ────────────────────────────────
+CRON_JOB="0 9 1 * * curl -s -X POST '${BASE_URL}&endpoint=subdomains&action=renew' \
+  -H 'X-API-Key: ${DNSHE_API_KEY}' \
+  -H 'X-API-Secret: ${DNSHE_API_SECRET}' \
+  -H 'Content-Type: application/json' \
+  -d '{\"subdomain_id\": ${SUBDOMAIN_ID}}'"
+
+(crontab -l 2>/dev/null; echo "${CRON_JOB}") | crontab -
+
+echo "Renewal cron job scheduled."
+echo "Done — ${SUBDOMAIN}.${ROOTDOMAIN} is live and will renew automatically."
+```
+
+Run the script after exporting your credentials:
+
+```bash
+chmod +x dnshe-setup.sh
+./dnshe-setup.sh
+```
+
+## Why each step matters
+
+| Step | Why it matters |
+| --- | --- |
+| Register subdomain | Provisions the subdomain under your chosen root domain. |
+| Add A record | Routes HTTP/HTTPS traffic from the subdomain to your server. |
+| Schedule renewal | Ensures the 180-day renewal window is never missed — the subdomain stays active indefinitely with no manual intervention. |
+
+For more detail on any individual step, see the [DNS records guide](/guides/dns-records) and the [renewal guide](/guides/renewal).

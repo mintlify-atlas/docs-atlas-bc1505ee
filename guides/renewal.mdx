@@ -1,0 +1,78 @@
+---
+title: "Keep your DNSHE subdomain active: renewal guide"
+description: "Keep your DNSHE subdomain active by renewing within the 180-day window. Renew from the dashboard or automate it with a cron job and the REST API."
+---
+
+Your DNSHE subdomain is free, but it does require periodic renewal to stay active. DNSHE offers an industry-leading 180-day (six-month) renewal window, meaning you can renew at any point during the last 180 days before your subdomain's expiry date. This generous window gives you ample time to renew manually from the dashboard or to automate the process entirely through the API so your services are never interrupted.
+
+<Warning>
+  If your subdomain expires without renewal, it becomes available for anyone else to register. DNS records associated with the subdomain are also removed, which will take your services offline. Renew early or automate renewal to avoid downtime.
+</Warning>
+
+## Renewing via the dashboard
+
+<Steps>
+  <Step title="Log in to the DNSHE console">
+    Navigate to [dnshe.com](https://www.dnshe.com) and sign in to your account.
+  </Step>
+  <Step title="Open My Domain Management">
+    From the main navigation, click **My Domain Management** to view a list of all your registered subdomains and their expiry dates.
+  </Step>
+  <Step title="Locate the subdomain to renew">
+    Find the subdomain you want to renew. Subdomains within the 180-day renewal window will show a **Renew** button next to them.
+  </Step>
+  <Step title="Confirm renewal">
+    Click **Renew** and confirm the action in the dialog. The subdomain's expiry date will be extended immediately. No payment is required.
+  </Step>
+</Steps>
+
+## Renewing via the API
+
+You can renew a subdomain programmatically by sending a `POST` request to the `subdomains` endpoint with the `renew` action.
+
+**Endpoint**
+
+```
+POST /index.php?m=domain_hub&endpoint=subdomains&action=renew
+```
+
+**Request body**
+
+```json
+{
+  "subdomain_id": 3
+}
+```
+
+**Complete curl example**
+
+```bash
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=renew" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{"subdomain_id": 3}'
+```
+
+To find your `subdomain_id`, call the list endpoint first:
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=list" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy"
+```
+
+## Automating renewal with cron
+
+The safest way to ensure your subdomain never expires is to schedule a renewal job that runs automatically. Because the renewal window is 180 days, a monthly cron job is more than sufficient.
+
+```bash
+# Renew subdomain ID 3 on the 1st of every month at 09:00 UTC
+0 9 1 * * curl -s -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=renew" \
+  -H "X-API-Key: $DNSHE_API_KEY" \
+  -H "X-API-Secret: $DNSHE_API_SECRET" \
+  -H "Content-Type: application/json" \
+  -d '{"subdomain_id": 3}'
+```
+
+Store your credentials in environment variables (`DNSHE_API_KEY` and `DNSHE_API_SECRET`) rather than hard-coding them in the crontab. See the [Automating domain management](/guides/automation) guide for a full walkthrough of environment variable setup and scripted workflows.

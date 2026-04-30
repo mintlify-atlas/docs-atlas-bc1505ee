@@ -1,0 +1,119 @@
+---
+title: "Add and manage DNS records for your DNSHE subdomain"
+description: "Add, list, and configure DNS records for your DNSHE subdomain using the dashboard or the REST API, with global Anycast propagation in seconds."
+---
+
+Once you have a subdomain registered with DNSHE, DNS records are what make it useful — they tell the world where to route traffic for your domain. DNSHE's Anycast infrastructure propagates record changes globally within seconds, so the moment you add or update a record it is already resolving correctly for users on every continent.
+
+<Note>
+  DNSHE uses an enterprise-grade Anycast network with redundant nodes worldwide. This means DNS queries for your subdomain are answered by the node closest to the requester, ensuring millisecond-level resolution latency regardless of where your users are located.
+</Note>
+
+## Supported record types
+
+DNSHE supports the full set of standard DNS record types needed for most workloads:
+
+<CardGroup cols={4}>
+  <Card title="A" icon="server">
+    Maps a hostname to an IPv4 address.
+  </Card>
+  <Card title="AAAA" icon="server">
+    Maps a hostname to an IPv6 address.
+  </Card>
+  <Card title="CNAME" icon="arrow-right">
+    Aliases one hostname to another hostname.
+  </Card>
+  <Card title="MX" icon="envelope">
+    Specifies mail exchange servers for email delivery.
+  </Card>
+  <Card title="TXT" icon="file-lines">
+    Stores arbitrary text — used for SPF, DKIM, domain verification, and more.
+  </Card>
+  <Card title="NS" icon="globe">
+    Delegates a subdomain to authoritative name servers.
+  </Card>
+  <Card title="SRV" icon="gear">
+    Specifies the location of services such as SIP or XMPP.
+  </Card>
+  <Card title="CAA" icon="shield">
+    Controls which certificate authorities may issue TLS certificates.
+  </Card>
+</CardGroup>
+
+## Listing existing DNS records
+
+To retrieve all DNS records associated with a subdomain, send a `GET` request with the subdomain's ID:
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=list&subdomain_id=1" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy"
+```
+
+## Creating a DNS record
+
+Send a `POST` request to the `dns_records` endpoint with the `create` action. The request body must include the `subdomain_id`, the record `type`, and the record `content`.
+
+**Endpoint**
+
+```
+POST /index.php?m=domain_hub&endpoint=dns_records&action=create
+```
+
+The examples below show the correct body format for the most common record types.
+
+<CodeGroup>
+
+```bash A record
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=create" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subdomain_id": 1,
+    "type": "A",
+    "content": "203.0.113.42"
+  }'
+```
+
+```bash AAAA record
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=create" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subdomain_id": 1,
+    "type": "AAAA",
+    "content": "2001:db8::1"
+  }'
+```
+
+```bash CNAME record
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=create" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subdomain_id": 1,
+    "type": "CNAME",
+    "content": "my-app.example.com"
+  }'
+```
+
+```bash TXT record
+curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=create" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "subdomain_id": 1,
+    "type": "TXT",
+    "content": "v=spf1 include:mailprovider.example.com ~all"
+  }'
+```
+
+</CodeGroup>
+
+## Propagation speed
+
+Changes to DNS records on DNSHE propagate globally within seconds thanks to the Anycast network. You do not need to wait for a traditional TTL window to expire before your changes take effect. This makes DNSHE particularly well-suited for dynamic infrastructure, ephemeral environments, and automated certificate workflows that depend on rapid DNS updates.

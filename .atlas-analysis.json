@@ -1,0 +1,92 @@
+{
+  "projectType": "api-service",
+  "projectName": "DNSHE Free Domains",
+  "projectDescription": "A free, non-profit subdomain distribution platform with enterprise-grade Anycast DNS infrastructure, a 180-day renewal window, and a REST API for automation.",
+  "theme": "luma",
+  "primaryColor": "#94cb04",
+  "lightColor": "#545454",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "domain-suffixes"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/renewal",
+              "guides/dns-records",
+              "guides/automation"
+            ]
+          },
+          {
+            "group": "Policy & Support",
+            "pages": [
+              "policy/acceptable-use",
+              "policy/faq"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Overview",
+            "pages": [
+              "api/overview",
+              "api/authentication"
+            ]
+          },
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api/subdomains",
+              "api/dns-records",
+              "api/api-keys",
+              "api/quota",
+              "api/whois"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "api/errors",
+              "api/rate-limits",
+              "api/changelog"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Free subdomains across 4+ TLDs (us.ci, cc.cd, de5.net, ccwu.cc)",
+    "180-day renewal window for uninterrupted service",
+    "Enterprise-grade Anycast DNS with 99.9% uptime",
+    "REST API for programmatic subdomain and DNS record management",
+    "Support for A, AAAA, CNAME, MX, TXT, NS, SRV, and CAA record types",
+    "API key management with IP whitelisting",
+    "Quota tracking and rate limiting (60 req/min)"
+  ],
+  "publicApiSurface": [
+    "GET /index.php?m=domain_hub&endpoint=subdomains&action=list",
+    "POST /index.php?m=domain_hub&endpoint=subdomains&action=register",
+    "GET /index.php?m=domain_hub&endpoint=subdomains&action=get",
+    "POST /index.php?m=domain_hub&endpoint=subdomains&action=delete",
+    "POST /index.php?m=domain_hub&endpoint=subdomains&action=renew",
+    "GET /index.php?m=domain_hub&endpoint=dns_records&action=list",
+    "POST /index.php?m=domain_hub&endpoint=dns_records&action=create",
+    "GET /index.php?m=domain_hub&endpoint=keys&action=list",
+    "GET /index.php?m=domain_hub&endpoint=quota",
+    "GET /index.php?m=domain_hub&endpoint=whois"
+  ]
+}

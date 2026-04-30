@@ -1,0 +1,59 @@
+---
+title: "DNSHE frequently asked questions about subdomains"
+description: "Common questions about DNSHE: pricing, DNS propagation speed, supported record types, rate limits, renewal windows, and production use."
+---
+
+Whether you are registering your first subdomain or automating renewals across a fleet of services, the answers below cover the most common questions about DNSHE's free subdomain platform, Anycast DNS infrastructure, and v2.0 REST API.
+
+<AccordionGroup>
+  <Accordion title="Is DNSHE really free?">
+    Yes. DNSHE is a non-profit platform and charges nothing for subdomain registration or DNS hosting. No credit card is required at any point. The mission is to lower the barrier for developers, students, and open-source enthusiasts to build a digital presence.
+  </Accordion>
+
+  <Accordion title="What happens if I do not renew my domain in time?">
+    If a domain is not renewed before it expires, it is released and becomes available for others to register. DNSHE eases this risk with an industry-leading **180-day (6-month) renewal window** — far longer than most providers. This gives you plenty of time to renew manually through the dashboard or via an automated renewal script using the API.
+  </Accordion>
+
+  <Accordion title="How long does DNS propagation take?">
+    Changes propagate globally within **seconds**. DNSHE's infrastructure is built on enterprise-grade Anycast technology, which routes queries to the nearest available node. This delivers millisecond-level resolution latency and means your updates are visible worldwide almost immediately after saving.
+  </Accordion>
+
+  <Accordion title="What DNS record types are supported?">
+    DNSHE supports the full set of standard record types:
+
+    - **A** — IPv4 address
+    - **AAAA** — IPv6 address
+    - **CNAME** — canonical name alias
+    - **MX** — mail exchange
+    - **TXT** — text records (SPF, DKIM, domain verification, etc.)
+    - **NS** — name server delegation
+    - **SRV** — service locator
+    - **CAA** — certification authority authorisation
+  </Accordion>
+
+  <Accordion title="I lost my API secret — how do I recover it?">
+    API secrets cannot be retrieved once generated. If you have lost yours, use the `regenerate` action via the API Key Management endpoint to create a new secret. Your API key (`cfsd_...`) remains the same; only the secret is replaced. Update any scripts or environment variables that reference the old secret immediately after regenerating.
+  </Accordion>
+
+  <Accordion title="Does DNSHE support batch API operations?">
+    Not in the current release. The v2.0 API processes one operation per request. If you need to register or manage multiple subdomains, loop over your list and issue individual requests. Keep the rate limit in mind when scripting bulk operations.
+  </Accordion>
+
+  <Accordion title="How do I get access to more domain suffixes?">
+    Four suffixes are publicly documented (`*.us.ci`, `*.cc.cd`, `*.de5.net`, `*.ccwu.cc`), but additional premium extensions are available after logging in to the [DNSHE console](https://www.dnshe.com). Sign in and browse the domain registration section to see the full list of available suffixes.
+  </Accordion>
+
+  <Accordion title="How do I contact support?">
+    - **Dashboard and self-service:** [https://www.dnshe.com](https://www.dnshe.com)
+    - **General support:** [support@dnshe.com](mailto:support@dnshe.com)
+    - **Abuse reports:** [abuse@dnshe.com](mailto:abuse@dnshe.com) or [https://www.dnshe.com/domainabuse/](https://www.dnshe.com/domainabuse/)
+  </Accordion>
+
+  <Accordion title="What is the API rate limit?">
+    The default rate limit is **60 requests per minute**. The limit is configurable — contact support if your use case requires a higher threshold. When the limit is exceeded, the API returns an `error_code` of `rate_limit_exceeded` along with the current limit and remaining request count.
+  </Accordion>
+
+  <Accordion title="Can I use DNSHE for production workloads?">
+    Yes. DNSHE's Anycast infrastructure is designed for production use and provides **99.9% uptime** for DNS resolution through redundant global nodes. The platform is used for SaaS endpoints, automated certificate renewals, and API services. For any production deployment, follow the security best practices in the API documentation: store credentials in environment variables, enable IP whitelisting, and rotate API keys regularly.
+  </Accordion>
+</AccordionGroup>

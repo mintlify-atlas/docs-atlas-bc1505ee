@@ -1,0 +1,97 @@
+---
+title: "Authenticate requests to the DNSHE domain hub API"
+description: "Create API credentials in the DNSHE dashboard, pass them as X-API-Key and X-API-Secret headers, and follow key security best practices."
+---
+
+Every DNSHE API request (except the public WHOIS lookup) must be authenticated with two credentials: an API key and an API secret. You create these in the DNSHE dashboard, then pass them as HTTP headers with each call. This page walks you through getting your credentials, making your first authenticated request, and keeping your keys secure.
+
+## Get your API credentials
+
+<Steps>
+  <Step title="Log in to the DNSHE client area">
+    Go to [dnshe.com](https://www.dnshe.com) and sign in to your account.
+  </Step>
+  <Step title="Open My Domain Management">
+    From the main navigation, select **My Domain Management**.
+  </Step>
+  <Step title="Navigate to API Management">
+    Click **API Management** in the sidebar.
+  </Step>
+  <Step title="Create a new API key">
+    Click **Create API Key**. The dashboard will display your new `X-API-Key` (prefixed `cfsd_`) and your `X-API-Secret`. Copy both values immediately — the secret is shown only once.
+  </Step>
+</Steps>
+
+<Note>
+  Your `X-API-Key` always starts with the prefix `cfsd_`. If it does not, you may be looking at a legacy credential.
+</Note>
+
+## Authenticate via HTTP headers (recommended)
+
+Pass your credentials as request headers on every API call. This is the only supported authentication method.
+
+| Header | Value |
+| --- | --- |
+| `X-API-Key` | Your API key, e.g. `cfsd_xxxxxxxxxx` |
+| `X-API-Secret` | Your API secret |
+
+### Example: list your subdomains
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=list" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy"
+```
+
+A successful response looks like this:
+
+```json
+{
+  "success": true,
+  "count": 2,
+  "subdomains": [
+    {
+      "id": 1,
+      "subdomain": "test",
+      "rootdomain": "example.com",
+      "full_domain": "test.example.com",
+      "status": "active"
+    }
+  ]
+}
+```
+
+## Deprecated: URL parameter authentication
+
+<Warning>
+  Passing `api_key` and `api_secret` as URL query parameters or in the request body is no longer supported. Credentials in URLs are routinely captured in server access logs, browser history, and proxy caches, where they can be read by anyone with access to those systems. Always use HTTP headers instead.
+</Warning>
+
+## Error responses
+
+If your credentials are missing, malformed, or invalid, the API returns an error response with the following body:
+
+```json
+{
+  "success": false,
+  "error_code": "auth_invalid_credentials",
+  "message": "Invalid API key"
+}
+```
+
+Double-check that you are sending both `X-API-Key` and `X-API-Secret` headers and that neither value contains extra whitespace or truncation.
+
+## Security best practices
+
+- **Use environment variables.** Never hardcode credentials in source code or commit them to version control. Store them in environment variables or a secrets manager and reference them at runtime.
+- **Enable IP whitelisting for production keys.** Restrict each API key to the IP addresses or CIDR ranges that legitimately need access.
+- **Rotate keys regularly.** Create a new key, migrate your services, then revoke the old one on a scheduled basis.
+- **Always use HTTPS.** The base URL is already HTTPS, but ensure any proxies or tooling in your stack do not downgrade to HTTP.
+
+<Tip>
+  For production workloads, enable IP whitelisting on your API key from the API Management dashboard. Even if a key is leaked, an attacker on a different IP cannot use it.
+</Tip>
+
+## Regenerating a lost API secret
+
+If you lose your API secret, it cannot be retrieved. Go to **API Management** in the DNSHE dashboard and use the **Regenerate** option on your key to issue a new secret. The old secret is invalidated immediately, so update all services and environment variables that reference it before the next API call.

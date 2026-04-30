@@ -1,81 +1,126 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
-icon: 'rocket'
+title: "Get started with DNSHE Free Domains in minutes"
+description: "Register a free DNSHE subdomain, add a DNS record, verify global resolution, and configure automated renewal in under five minutes."
 ---
 
-## Get started in three steps
+Getting your first subdomain live on DNSHE takes only a few minutes. You will register an account, claim a subdomain on one of the four public suffixes, point it to your server, and confirm global resolution — all without entering a credit card.
 
-Get your documentation site running locally and make your first customization.
+<Steps>
+  <Step title="Register at dnshe.com">
+    Go to [dnshe.com](https://www.dnshe.com) and create a free account. No credit card is required. Once registered, log in to access the domain management console.
+  </Step>
 
-### Step 1: Set up your local environment
+  <Step title="Search and claim a subdomain">
+    In the console, search for your desired prefix. Choose a suffix that fits your use case:
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    - `*.us.ci` — CI/CD pipelines, SaaS, API endpoints
+    - `*.cc.cd` — Creative projects, portfolios
+    - `*.de5.net` — Technical blogs, docs, dev environments
+    - `*.ccwu.cc` — Personal pages, community sites
 
-### Step 2: Deploy your changes
+    For example, to claim `myapp.us.ci`, enter `myapp` and select the `us.ci` suffix. If the prefix is available, confirm the registration.
+  </Step>
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+  <Step title="Add a DNS record">
+    After claiming your subdomain, navigate to its DNS management page and add an A record to point it to your server's IP address.
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    **Example — A record pointing to `203.0.113.10`:**
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    | Type | Name | Content | TTL |
+    | :--- | :--- | :--- | :--- |
+    | A | myapp.us.ci | 203.0.113.10 | Auto |
 
-### Step 3: Go live
+    You can also create this record via the API:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    ```bash
+    curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=dns_records&action=create" \
+      -H "X-API-Key: cfsd_xxxxxxxxxx" \
+      -H "X-API-Secret: yyyyyyyyyyyy" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "subdomain_id": 1,
+        "type": "A",
+        "content": "203.0.113.10"
+      }'
+    ```
+
+    <Note>
+      DNS changes propagate globally in seconds thanks to DNSHE's Anycast infrastructure.
+    </Note>
+  </Step>
+
+  <Step title="Verify it works">
+    Once the record is saved, confirm resolution using `dig` or `nslookup`:
+
+    ```bash
+    dig myapp.us.ci
+    ```
+
+    ```bash
+    nslookup myapp.us.ci
+    ```
+
+    You should see your IP address in the answer section. You can also verify via the API by listing your subdomains:
+
+    ```bash
+    curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=list" \
+      -H "X-API-Key: cfsd_xxxxxxxxxx" \
+      -H "X-API-Secret: yyyyyyyyyyyy"
+    ```
+
+    A successful response looks like this:
+
+    ```json
+    {
+      "success": true,
+      "count": 1,
+      "subdomains": [
+        {
+          "id": 1,
+          "subdomain": "myapp",
+          "rootdomain": "us.ci",
+          "full_domain": "myapp.us.ci",
+          "status": "active"
+        }
+      ]
+    }
+    ```
+  </Step>
+
+  <Step title="Set up renewal">
+    DNSHE provides a 180-day renewal window — the longest in the industry. You have two options:
+
+    **Option A — Automated renewal via API:**
+
+    ```bash
+    curl -X POST "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=subdomains&action=renew" \
+      -H "X-API-Key: cfsd_xxxxxxxxxx" \
+      -H "X-API-Secret: yyyyyyyyyyyy" \
+      -H "Content-Type: application/json" \
+      -d '{"subdomain_id": 1}'
+    ```
+
+    Schedule this command with a cron job or CI pipeline to renew automatically before expiry.
+
+    **Option B — Calendar reminder:**
+
+    Set a recurring reminder in your calendar to log in to the [DNSHE console](https://www.dnshe.com) and renew from the dashboard before your subdomain expires.
+  </Step>
+</Steps>
 
 ## Next steps
 
-Now that you have your docs running, explore these key features:
-
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Available domain suffixes" icon="globe" href="/domain-suffixes">
+    Learn about all four public suffixes and which one fits your project best.
+  </Card>
+  <Card title="DNS records guide" icon="list" href="/guides/dns-records">
+    Add MX, TXT, CNAME, and other record types to your subdomain.
+  </Card>
+  <Card title="Renewal guide" icon="rotate" href="/guides/renewal">
+    Automate renewals with a cron job or CI pipeline using the REST API.
+  </Card>
+  <Card title="API reference" icon="code" href="/api/overview">
+    Full reference for all API endpoints, authentication, and rate limits.
+  </Card>
 </CardGroup>
-
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>

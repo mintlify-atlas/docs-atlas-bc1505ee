@@ -1,0 +1,36 @@
+---
+title: "DNSHE API changelog: v2.0 and v1.0 release notes"
+description: "A complete history of DNSHE API releases, including new capabilities, breaking changes, and improvements introduced in each version."
+---
+
+This page documents every version of the DNSHE API, with release dates, new features, and any breaking changes you need to know about when upgrading.
+
+## v2.0 — 2026-04-25
+
+The official v2.0 release is the current stable version of the DNSHE API.
+
+<Warning>
+**Breaking change:** Passing `api_key` and `api_secret` as URL parameters or in the request body is no longer supported. You must authenticate using HTTP headers (`X-API-Key` and `X-API-Secret`) in all requests.
+</Warning>
+
+**What's new in v2.0:**
+
+- Official release of the v2.0 API
+- Optimized API command structure with a cleaner, more consistent endpoint design
+- Added new API capabilities across subdomain and DNS record management
+- Improved pagination and query performance for list operations
+- Enhanced error handling and security hardening throughout the API
+
+---
+
+## v1.0 — 2025-10-19
+
+The initial release of the DNSHE API, establishing the core feature set.
+
+**What was included in v1.0:**
+
+- Subdomain management (list, register, get, delete, renew)
+- DNS record management (list, create)
+- API key management
+- Quota reporting
+- Rate limiting (60 requests per minute)

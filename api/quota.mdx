@@ -1,0 +1,25 @@
+---
+title: "Quota endpoint: check your DNSHE account usage limits"
+description: "Retrieve your account's subdomain quota and usage limits from the DNSHE domain hub. Check available headroom before running bulk provisioning workflows."
+---
+
+The quota endpoint returns information about the usage limits that apply to your account, such as the maximum number of subdomains you can register. Checking quota before attempting bulk operations lets you handle limits gracefully in your code rather than receiving unexpected errors.
+
+---
+
+## Get quota
+
+Returns quota and usage information for the authenticated account.
+
+**Method:** `GET`
+**URL:** `https://api005.dnshe.com/index.php?m=domain_hub&endpoint=quota`
+
+```bash
+curl -X GET "https://api005.dnshe.com/index.php?m=domain_hub&endpoint=quota" \
+  -H "X-API-Key: cfsd_xxxxxxxxxx" \
+  -H "X-API-Secret: yyyyyyyyyyyy"
+```
+
+<Note>
+  Quota limits govern how many subdomains and DNS records your account can hold. The API also enforces a rate limit of 60 requests per minute across all endpoints. If you exceed the rate limit, you will receive a `rate_limit_exceeded` error response with details on the current limit and remaining requests. See the [rate limits](/api/rate-limits) reference for more information.
+</Note>
